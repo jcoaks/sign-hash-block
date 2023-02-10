@@ -1,4 +1,4 @@
-/KEYS/*
 .DS_Store
-package-lock.json
+KEYS/
 node_modules/
+package-lock.json

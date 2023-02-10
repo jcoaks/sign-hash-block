@@ -63,7 +63,7 @@ async function sign(params){
 
     const algorithmParameters = {
         name: "RSA-PSS",
-        saltLength: 128,
+        saltLength: 32,
     };
 
     let signature0 = await subtle.sign(
