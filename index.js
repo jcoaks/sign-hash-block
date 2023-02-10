@@ -56,7 +56,8 @@ async function sign(params){
         version: parseInt(params.version),
         data: params.data,
         timestamp: parseInt(params.timestamp),
-        scope: params.scope
+        scope: params.scope,
+        by: params.by
     };
 
     console.log(blockToSign);
