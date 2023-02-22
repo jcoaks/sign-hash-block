@@ -1,7 +1,8 @@
 const fs = require("fs");
 const crypto = require("crypto");
 const { Crypto } = require("@peculiar/webcrypto");
-const express= require('express')
+const express= require('express');
+const { version } = require("os");
 
 const app = express()
 const cryptosubtle = new Crypto();
@@ -9,7 +10,7 @@ const subtle = cryptosubtle.subtle;
 
 let keyPairs = {};
 
-const port = 3000;
+const port = 3050;
 
 app.use(express.urlencoded({
     extended: true
@@ -31,7 +32,7 @@ app.post('/generate-hash', function(req, res) {
 });
 
 function generateHash(params) {
-    let blockToSign = {
+    let blockToHash = {
         prevHash: params.prevHash,
         height: parseInt(params.height),
         version: parseInt(params.version),
@@ -43,9 +44,15 @@ function generateHash(params) {
         rootPrevHash: params.rootPrevHash,
         rootHeight: parseInt(params.rootHeight)
     };
-    console.log(blockToSign)
+
+    if(params.version == 2){
+        delete blockToHash.rootPrevHash;
+        delete blockToHash.rootHeight;
+    }
+
+    console.log("blockToHash", blockToHash)
     var hash = crypto.createHash("sha256");
-    const data = hash.update(JSON.stringify(blockToSign));
+    const data = hash.update(JSON.stringify(blockToHash));
     return data.digest("hex");
 }
 
@@ -56,16 +63,19 @@ async function sign(params){
         version: parseInt(params.version),
         data: params.data,
         timestamp: parseInt(params.timestamp),
-        scope: params.scope,
-        by: params.by
+        scope: params.scope
     };
 
-    console.log(blockToSign);
+    console.log("blockToSign", blockToSign);
 
     const algorithmParameters = {
         name: "RSA-PSS",
-        saltLength: 32,
+        saltLength: 128,
     };
+    if(params.version == 2){
+        algorithmParameters.saltLength = 32;
+    }
+    console.log("algorithmParameters", algorithmParameters);
 
     let signature0 = await subtle.sign(
         algorithmParameters,
