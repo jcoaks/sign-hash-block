@@ -39,16 +39,9 @@ function generateHash(params) {
         data: params.data,
         timestamp: parseInt(params.timestamp),
         scope: params.scope,
-        signature: params.signature,
         by: params.by,
-        rootPrevHash: params.rootPrevHash,
-        rootHeight: parseInt(params.rootHeight)
+        signature: params.signature,
     };
-
-    if(params.version == 2){
-        delete blockToHash.rootPrevHash;
-        delete blockToHash.rootHeight;
-    }
 
     console.log("blockToHash", blockToHash)
     var hash = crypto.createHash("sha256");
@@ -63,18 +56,20 @@ async function sign(params){
         version: parseInt(params.version),
         data: params.data,
         timestamp: parseInt(params.timestamp),
-        scope: params.scope
+        scope: params.scope,
+        by: params.by
     };
+    if(params.version == 1){
+        delete blockToSign.by;
+    }
 
     console.log("blockToSign", blockToSign);
 
     const algorithmParameters = {
         name: "RSA-PSS",
-        saltLength: 128,
+        saltLength: 32,
     };
-    if(params.version == 2){
-        algorithmParameters.saltLength = 32;
-    }
+
     console.log("algorithmParameters", algorithmParameters);
 
     let signature0 = await subtle.sign(
